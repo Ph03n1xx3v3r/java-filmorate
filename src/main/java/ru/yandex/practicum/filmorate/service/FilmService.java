@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,17 +13,19 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final Map<Long, Film> films = new HashMap<>();
     private final Map<Long, Set<Long>> likes = new HashMap<>();
-    private final Map<Long, Map<String, Object>> mpaStorage = new HashMap<>();
-    private final Map<Long, Map<String, Object>> genreStorage = new HashMap<>();
+    private final Map<Long, Map<String, Object>> mpaStorage;
+    private final Map<Long, Map<String, Object>> genreStorage;
     private long nextId = 1L;
 
-    {
+    public FilmService() {
+        mpaStorage = new HashMap<>();
         mpaStorage.put(1L, Map.of("id", 1, "name", "G"));
         mpaStorage.put(2L, Map.of("id", 2, "name", "PG"));
         mpaStorage.put(3L, Map.of("id", 3, "name", "PG-13"));
         mpaStorage.put(4L, Map.of("id", 4, "name", "R"));
         mpaStorage.put(5L, Map.of("id", 5, "name", "NC-17"));
 
+        genreStorage = new HashMap<>();
         genreStorage.put(1L, Map.of("id", 1, "name", "Комедия"));
         genreStorage.put(2L, Map.of("id", 2, "name", "Драма"));
         genreStorage.put(3L, Map.of("id", 3, "name", "Боевик"));
