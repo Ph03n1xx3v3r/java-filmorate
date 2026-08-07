@@ -48,6 +48,14 @@ public class FilmService {
     public Film addFilm(Film film) {
         enrichFilm(film);
         film.setId(nextId++);
+        // Инициализируем поля, чтобы они всегда присутствовали в ответе
+        if (film.getGenres() == null) {
+            film.setGenres(Collections.emptyList());
+        }
+        if (film.getDirectors() == null) {
+            film.setDirectors(Collections.emptyList());
+        }
+        // mpa оставляем как есть (если null, то поле будет присутствовать со значением null)
         films.put(film.getId(), film);
         likes.put(film.getId(), new HashSet<>());
         log.info("Добавлен фильм: {}", film);
@@ -62,6 +70,12 @@ public class FilmService {
             throw new ValidationException("Фильм с таким id не существует");
         }
         enrichFilm(film);
+        if (film.getGenres() == null) {
+            film.setGenres(Collections.emptyList());
+        }
+        if (film.getDirectors() == null) {
+            film.setDirectors(Collections.emptyList());
+        }
         films.put(film.getId(), film);
         log.info("Обновлён фильм: {}", film);
         return film;
@@ -94,6 +108,7 @@ public class FilmService {
                     .collect(Collectors.toList());
             film.setGenres(fullGenres);
         }
+        // directors не обогащаем, оставляем как есть
     }
 
     public void addLike(Long filmId, Long userId) {
@@ -149,6 +164,7 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
+        // Заглушка – возвращаем пустой список
         return List.of();
     }
 }
