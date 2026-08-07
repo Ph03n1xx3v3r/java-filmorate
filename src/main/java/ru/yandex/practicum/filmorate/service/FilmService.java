@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -35,29 +36,26 @@ public class FilmService {
     }
 
     public List<Film> getAllFilms() {
-        return new ArrayList<>(films.values());
+        List<Film> result = new ArrayList<>(films.values());
+        result.forEach(this::enrichFilmForResponse);
+        return result;
     }
 
     public Film getFilm(Long id) {
         if (!films.containsKey(id)) {
-            throw new ValidationException("Фильм с id " + id + " не найден");
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
-        return films.get(id);
+        Film film = films.get(id);
+        enrichFilmForResponse(film);
+        return film;
     }
 
     public Film addFilm(Film film) {
         enrichFilm(film);
         film.setId(nextId++);
-        // Инициализируем поля, чтобы они всегда присутствовали в ответе
-        if (film.getGenres() == null) {
-            film.setGenres(Collections.emptyList());
-        }
-        if (film.getDirectors() == null) {
-            film.setDirectors(Collections.emptyList());
-        }
-        // mpa оставляем как есть (если null, то поле будет присутствовать со значением null)
         films.put(film.getId(), film);
         likes.put(film.getId(), new HashSet<>());
+        enrichFilmForResponse(film);
         log.info("Добавлен фильм: {}", film);
         return film;
     }
@@ -67,23 +65,18 @@ public class FilmService {
             throw new ValidationException("Id должен быть указан");
         }
         if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с таким id не существует");
+            throw new NotFoundException("Фильм с таким id не существует");
         }
         enrichFilm(film);
-        if (film.getGenres() == null) {
-            film.setGenres(Collections.emptyList());
-        }
-        if (film.getDirectors() == null) {
-            film.setDirectors(Collections.emptyList());
-        }
         films.put(film.getId(), film);
+        enrichFilmForResponse(film);
         log.info("Обновлён фильм: {}", film);
         return film;
     }
 
     public void deleteFilm(Long id) {
         if (!films.containsKey(id)) {
-            throw new ValidationException("Фильм с id " + id + " не найден");
+            throw new NotFoundException("Фильм с id " + id + " не найден");
         }
         films.remove(id);
         likes.remove(id);
@@ -108,12 +101,24 @@ public class FilmService {
                     .collect(Collectors.toList());
             film.setGenres(fullGenres);
         }
-        // directors не обогащаем, оставляем как есть
+    }
+
+    private void enrichFilmForResponse(Film film) {
+        if (film.getGenres() == null) {
+            film.setGenres(Collections.emptyList());
+        }
+        if (film.getDirectors() == null) {
+            film.setDirectors(Collections.emptyList());
+        }
+        if (film.getMpa() == null) {
+            // Устанавливаем дефолтный MPA, если его нет
+            film.setMpa(Map.of("id", 1, "name", "G"));
+        }
     }
 
     public void addLike(Long filmId, Long userId) {
         if (!films.containsKey(filmId)) {
-            throw new ValidationException("Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
         likes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
         log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
@@ -121,11 +126,11 @@ public class FilmService {
 
     public void removeLike(Long filmId, Long userId) {
         if (!films.containsKey(filmId)) {
-            throw new ValidationException("Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         }
         Set<Long> filmLikes = likes.get(filmId);
         if (filmLikes == null || !filmLikes.contains(userId)) {
-            throw new ValidationException("Лайк не найден");
+            throw new NotFoundException("Лайк не найден");
         }
         filmLikes.remove(userId);
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
@@ -133,7 +138,7 @@ public class FilmService {
 
     public List<Film> getPopular(Integer count, Long genreId, Integer year) {
         int limit = (count == null || count <= 0) ? 10 : count;
-        return films.values().stream()
+        List<Film> popular = films.values().stream()
                 .sorted((f1, f2) -> {
                     int likes1 = likes.getOrDefault(f1.getId(), Collections.emptySet()).size();
                     int likes2 = likes.getOrDefault(f2.getId(), Collections.emptySet()).size();
@@ -141,30 +146,38 @@ public class FilmService {
                 })
                 .limit(limit)
                 .collect(Collectors.toList());
+        popular.forEach(this::enrichFilmForResponse);
+        return popular;
     }
 
     public List<Film> searchFilms(String query, String by) {
         if (query == null || query.isBlank()) {
-            return new ArrayList<>(films.values());
+            List<Film> result = new ArrayList<>(films.values());
+            result.forEach(this::enrichFilmForResponse);
+            return result;
         }
         String lowerQuery = query.toLowerCase();
-        return films.values().stream()
+        List<Film> result = films.values().stream()
                 .filter(f -> f.getName().toLowerCase().contains(lowerQuery) ||
                         f.getDescription().toLowerCase().contains(lowerQuery))
                 .collect(Collectors.toList());
+        result.forEach(this::enrichFilmForResponse);
+        return result;
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        return films.values().stream()
+        List<Film> result = films.values().stream()
                 .filter(f -> {
                     Set<Long> filmLikes = likes.getOrDefault(f.getId(), Collections.emptySet());
                     return filmLikes.contains(userId) && filmLikes.contains(friendId);
                 })
                 .collect(Collectors.toList());
+        result.forEach(this::enrichFilmForResponse);
+        return result;
     }
 
     public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
         // Заглушка – возвращаем пустой список
-        return List.of();
+        return Collections.emptyList();
     }
 }

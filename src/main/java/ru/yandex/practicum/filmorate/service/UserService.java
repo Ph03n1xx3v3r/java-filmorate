@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,7 +22,7 @@ public class UserService {
 
     public User getUser(Long id) {
         if (!users.containsKey(id)) {
-            throw new ValidationException("Пользователь с id " + id + " не найден");
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
         return users.get(id);
     }
@@ -41,7 +43,7 @@ public class UserService {
             throw new ValidationException("Id должен быть указан");
         }
         if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Пользователь с таким id не существует");
+            throw new NotFoundException("Пользователь с таким id не существует");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -53,7 +55,7 @@ public class UserService {
 
     public void deleteUser(Long id) {
         if (!users.containsKey(id)) {
-            throw new ValidationException("Пользователь с id " + id + " не найден");
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
         }
         users.remove(id);
         friends.remove(id);
@@ -65,7 +67,7 @@ public class UserService {
 
     public void addFriend(Long userId, Long friendId) {
         if (!users.containsKey(userId) || !users.containsKey(friendId)) {
-            throw new ValidationException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         if (userId.equals(friendId)) {
             throw new ValidationException("Нельзя добавить самого себя в друзья");
@@ -77,11 +79,11 @@ public class UserService {
 
     public void removeFriend(Long userId, Long friendId) {
         if (!users.containsKey(userId) || !users.containsKey(friendId)) {
-            throw new ValidationException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         Set<Long> userFriends = friends.get(userId);
         if (userFriends == null || !userFriends.contains(friendId)) {
-            throw new ValidationException("Друг не найден");
+            throw new NotFoundException("Друг не найден");
         }
         userFriends.remove(friendId);
         friends.get(friendId).remove(userId);
@@ -90,7 +92,7 @@ public class UserService {
 
     public List<User> getFriends(Long userId) {
         if (!users.containsKey(userId)) {
-            throw new ValidationException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         Set<Long> friendIds = friends.getOrDefault(userId, Collections.emptySet());
         return friendIds.stream()
@@ -101,7 +103,7 @@ public class UserService {
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
         if (!users.containsKey(userId) || !users.containsKey(otherId)) {
-            throw new ValidationException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         Set<Long> userFriends = friends.getOrDefault(userId, Collections.emptySet());
         Set<Long> otherFriends = friends.getOrDefault(otherId, Collections.emptySet());

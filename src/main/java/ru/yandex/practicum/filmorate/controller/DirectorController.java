@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +25,7 @@ public class DirectorController {
     @GetMapping("/{id}")
     public Map<String, Object> getDirector(@PathVariable Long id) {
         if (!directors.containsKey(id)) {
-            throw new ValidationException("Режиссёр не найден");
+            throw new NotFoundException("Режиссёр не найден");
         }
         return directors.get(id);
     }
@@ -46,7 +48,7 @@ public class DirectorController {
         }
         Long id = ((Number) director.get("id")).longValue();
         if (!directors.containsKey(id)) {
-            throw new ValidationException("Режиссёр не найден");
+            throw new NotFoundException("Режиссёр не найден");
         }
         directors.put(id, director);
         return director;
@@ -55,7 +57,7 @@ public class DirectorController {
     @DeleteMapping("/{id}")
     public void deleteDirector(@PathVariable Long id) {
         if (!directors.containsKey(id)) {
-            throw new ValidationException("Режиссёр не найден");
+            throw new NotFoundException("Режиссёр не найден");
         }
         directors.remove(id);
     }
