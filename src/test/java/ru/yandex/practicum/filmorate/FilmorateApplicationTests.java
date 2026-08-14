@@ -29,6 +29,8 @@ class FilmorateApplicationTests {
     void contextLoads() {
     }
 
+    // ========== ТЕСТЫ ДЛЯ FILM ==========
+
     @Test
     void shouldValidateCorrectFilm() {
         Film film = new Film();
@@ -133,6 +135,8 @@ class FilmorateApplicationTests {
                 violations.iterator().next().getMessage());
     }
 
+    // ========== ТЕСТЫ ДЛЯ USER (с группой OnCreate) ==========
+
     @Test
     void shouldValidateCorrectUser() {
         User user = new User();
@@ -180,7 +184,7 @@ class FilmorateApplicationTests {
         user.setBirthday(LocalDate.now());
 
         var violations = validator.validate(user, OnCreate.class);
-        assertEquals(2, violations.size()); // @NotBlank и @Pattern
+        assertEquals(2, violations.size());
     }
 
     @Test
@@ -231,7 +235,7 @@ class FilmorateApplicationTests {
         user.setLogin("login");
         user.setName("Name");
         user.setBirthday(LocalDate.now());
-        
+
         var violations = validator.validate(user, OnCreate.class);
         assertTrue(violations.isEmpty());
     }
