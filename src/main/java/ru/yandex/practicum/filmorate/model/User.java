@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import ru.yandex.practicum.filmorate.validation.OnCreate;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 
@@ -9,7 +8,7 @@ import java.time.LocalDate;
 public class User {
     private Long id;
 
-    @NotBlank(groups = OnCreate.class, message = "Email не может быть пустым")
+    @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Email должен быть корректным")
     private String email;
 

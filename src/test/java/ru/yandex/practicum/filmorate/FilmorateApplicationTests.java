@@ -3,14 +3,11 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.validation.OnCreate;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import jakarta.validation.groups.Default;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +27,7 @@ class FilmorateApplicationTests {
     void contextLoads() {
     }
 
+    // ========== ТЕСТЫ ДЛЯ USER ==========
 
     @Test
     void shouldValidateCorrectUser() {
@@ -39,7 +37,7 @@ class FilmorateApplicationTests {
         user.setName("Name");
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
+        var violations = validator.validate(user);
         assertTrue(violations.isEmpty());
     }
 
@@ -51,8 +49,9 @@ class FilmorateApplicationTests {
         user.setName("Name");
         user.setBirthday(LocalDate.now());
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
-        assertEquals(2, violations.size());
+        var violations = validator.validate(user);
+        assertEquals(1, violations.size());
+        assertEquals("Email не может быть пустым", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -63,7 +62,7 @@ class FilmorateApplicationTests {
         user.setName("Name");
         user.setBirthday(LocalDate.now());
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
+        var violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals("Email должен быть корректным", violations.iterator().next().getMessage());
     }
@@ -76,9 +75,8 @@ class FilmorateApplicationTests {
         user.setName("Name");
         user.setBirthday(LocalDate.now());
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
-        assertEquals(1, violations.size());
-        assertEquals("Логин не может быть пустым", violations.iterator().next().getMessage());
+        var violations = validator.validate(user);
+        assertEquals(2, violations.size());
     }
 
     @Test
@@ -89,7 +87,7 @@ class FilmorateApplicationTests {
         user.setName("Name");
         user.setBirthday(LocalDate.now());
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
+        var violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals("Логин не должен содержать пробелы", violations.iterator().next().getMessage());
     }
@@ -102,7 +100,7 @@ class FilmorateApplicationTests {
         user.setName(null);
         user.setBirthday(LocalDate.now());
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
+        var violations = validator.validate(user);
         assertTrue(violations.isEmpty());
 
         user.setName("");
@@ -117,7 +115,7 @@ class FilmorateApplicationTests {
         user.setName("Name");
         user.setBirthday(LocalDate.now().plusDays(1));
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
+        var violations = validator.validate(user);
         assertEquals(1, violations.size());
         assertEquals("Дата рождения не может быть в будущем", violations.iterator().next().getMessage());
     }
@@ -130,7 +128,7 @@ class FilmorateApplicationTests {
         user.setName("Name");
         user.setBirthday(LocalDate.now());
 
-        var violations = validator.validate(user, OnCreate.class, Default.class);
+        var violations = validator.validate(user);
         assertTrue(violations.isEmpty());
     }
 }
