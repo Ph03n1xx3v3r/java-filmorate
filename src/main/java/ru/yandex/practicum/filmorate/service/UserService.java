@@ -114,12 +114,4 @@ public class UserService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-
-    public List<Object> getFeed(Long userId) {
-        return List.of();
-    }
-
-    public List<Object> getRecommendations(Long userId) {
-        return List.of();
-    }
 }

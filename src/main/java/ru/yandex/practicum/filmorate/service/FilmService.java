@@ -16,6 +16,7 @@ public class FilmService {
     private final Map<Long, Set<Long>> likes = new HashMap<>();
     private final Map<Long, Map<String, Object>> mpaStorage;
     private final Map<Long, Map<String, Object>> genreStorage;
+    private final Map<Long, Set<Long>> directorToFilms = new HashMap<>();
     private long nextId = 1L;
 
     public FilmService() {
@@ -34,6 +35,8 @@ public class FilmService {
         genreStorage.put(5L, Map.of("id", 5, "name", "Мелодрама"));
         genreStorage.put(6L, Map.of("id", 6, "name", "Фантастика"));
     }
+
+    // Публичные методы
 
     public List<Film> getAllFilms() {
         List<Film> result = new ArrayList<>(films.values());
@@ -55,6 +58,12 @@ public class FilmService {
         film.setId(nextId++);
         films.put(film.getId(), film);
         likes.put(film.getId(), new HashSet<>());
+        if (film.getDirectors() != null) {
+            for (Map<String, Object> director : film.getDirectors()) {
+                Long directorId = ((Number) director.get("id")).longValue();
+                directorToFilms.computeIfAbsent(directorId, k -> new HashSet<>()).add(film.getId());
+            }
+        }
         enrichFilmForResponse(film);
         log.info("Добавлен фильм: {}", film);
         return film;
@@ -67,8 +76,25 @@ public class FilmService {
         if (!films.containsKey(film.getId())) {
             throw new NotFoundException("Фильм с таким id не существует");
         }
+        Film oldFilm = films.get(film.getId());
+        if (oldFilm.getDirectors() != null) {
+            for (Map<String, Object> director : oldFilm.getDirectors()) {
+                Long directorId = ((Number) director.get("id")).longValue();
+                Set<Long> filmIds = directorToFilms.get(directorId);
+                if (filmIds != null) {
+                    filmIds.remove(film.getId());
+                    if (filmIds.isEmpty()) directorToFilms.remove(directorId);
+                }
+            }
+        }
         enrichFilm(film);
         films.put(film.getId(), film);
+        if (film.getDirectors() != null) {
+            for (Map<String, Object> director : film.getDirectors()) {
+                Long directorId = ((Number) director.get("id")).longValue();
+                directorToFilms.computeIfAbsent(directorId, k -> new HashSet<>()).add(film.getId());
+            }
+        }
         enrichFilmForResponse(film);
         log.info("Обновлён фильм: {}", film);
         return film;
@@ -78,60 +104,32 @@ public class FilmService {
         if (!films.containsKey(id)) {
             throw new NotFoundException("Фильм с id " + id + " не найден");
         }
+        Film film = films.get(id);
+        if (film.getDirectors() != null) {
+            for (Map<String, Object> director : film.getDirectors()) {
+                Long directorId = ((Number) director.get("id")).longValue();
+                Set<Long> filmIds = directorToFilms.get(directorId);
+                if (filmIds != null) {
+                    filmIds.remove(id);
+                    if (filmIds.isEmpty()) directorToFilms.remove(directorId);
+                }
+            }
+        }
         films.remove(id);
         likes.remove(id);
         log.info("Удалён фильм с id={}", id);
     }
 
-    private void enrichFilm(Film film) {
-        if (film.getMpa() != null && film.getMpa().get("id") != null) {
-            Long mpaId = ((Number) film.getMpa().get("id")).longValue();
-            Map<String, Object> fullMpa = mpaStorage.get(mpaId);
-            if (fullMpa != null) {
-                film.setMpa(fullMpa);
-            }
-        }
-        if (film.getGenres() != null) {
-            List<Map<String, Object>> fullGenres = film.getGenres().stream()
-                    .map(g -> {
-                        Long id = ((Number) g.get("id")).longValue();
-                        return genreStorage.get(id);
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            film.setGenres(fullGenres);
-        }
-    }
-
-    private void enrichFilmForResponse(Film film) {
-        if (film.getGenres() == null) {
-            film.setGenres(Collections.emptyList());
-        }
-        if (film.getDirectors() == null) {
-            film.setDirectors(Collections.emptyList());
-        }
-        if (film.getMpa() == null) {
-            // Устанавливаем дефолтный MPA, если его нет
-            film.setMpa(Map.of("id", 1, "name", "G"));
-        }
-    }
-
     public void addLike(Long filmId, Long userId) {
-        if (!films.containsKey(filmId)) {
-            throw new NotFoundException("Фильм не найден");
-        }
+        if (!films.containsKey(filmId)) throw new NotFoundException("Фильм не найден");
         likes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
         log.info("Пользователь {} поставил лайк фильму {}", userId, filmId);
     }
 
     public void removeLike(Long filmId, Long userId) {
-        if (!films.containsKey(filmId)) {
-            throw new NotFoundException("Фильм не найден");
-        }
+        if (!films.containsKey(filmId)) throw new NotFoundException("Фильм не найден");
         Set<Long> filmLikes = likes.get(filmId);
-        if (filmLikes == null || !filmLikes.contains(userId)) {
-            throw new NotFoundException("Лайк не найден");
-        }
+        if (filmLikes == null || !filmLikes.contains(userId)) throw new NotFoundException("Лайк не найден");
         filmLikes.remove(userId);
         log.info("Пользователь {} удалил лайк у фильма {}", userId, filmId);
     }
@@ -140,9 +138,9 @@ public class FilmService {
         int limit = (count == null || count <= 0) ? 10 : count;
         List<Film> popular = films.values().stream()
                 .sorted((f1, f2) -> {
-                    int likes1 = likes.getOrDefault(f1.getId(), Collections.emptySet()).size();
-                    int likes2 = likes.getOrDefault(f2.getId(), Collections.emptySet()).size();
-                    return Integer.compare(likes2, likes1);
+                    int l1 = likes.getOrDefault(f1.getId(), Collections.emptySet()).size();
+                    int l2 = likes.getOrDefault(f2.getId(), Collections.emptySet()).size();
+                    return Integer.compare(l2, l1);
                 })
                 .limit(limit)
                 .collect(Collectors.toList());
@@ -177,7 +175,47 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
-        // Заглушка – возвращаем пустой список
-        return Collections.emptyList();
+        Set<Long> filmIds = directorToFilms.getOrDefault(directorId, Collections.emptySet());
+        List<Film> result = filmIds.stream()
+                .map(films::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if ("year".equalsIgnoreCase(sortBy)) {
+            result.sort(Comparator.comparing(Film::getReleaseDate));
+        } else if ("likes".equalsIgnoreCase(sortBy)) {
+            result.sort((f1, f2) -> {
+                int l1 = likes.getOrDefault(f1.getId(), Collections.emptySet()).size();
+                int l2 = likes.getOrDefault(f2.getId(), Collections.emptySet()).size();
+                return Integer.compare(l2, l1);
+            });
+        }
+        result.forEach(this::enrichFilmForResponse);
+        return result;
+    }
+
+    // Приватные методы
+
+    private void enrichFilm(Film film) {
+        if (film.getMpa() != null && film.getMpa().get("id") != null) {
+            Long mpaId = ((Number) film.getMpa().get("id")).longValue();
+            Map<String, Object> fullMpa = mpaStorage.get(mpaId);
+            if (fullMpa != null) film.setMpa(fullMpa);
+        }
+        if (film.getGenres() != null) {
+            List<Map<String, Object>> fullGenres = film.getGenres().stream()
+                    .map(g -> {
+                        Long id = ((Number) g.get("id")).longValue();
+                        return genreStorage.get(id);
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            film.setGenres(fullGenres);
+        }
+    }
+
+    private void enrichFilmForResponse(Film film) {
+        if (film.getGenres() == null) film.setGenres(Collections.emptyList());
+        if (film.getDirectors() == null) film.setDirectors(Collections.emptyList());
+        if (film.getMpa() == null) film.setMpa(Map.of("id", 1, "name", "G"));
     }
 }
