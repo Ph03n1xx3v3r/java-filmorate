@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -63,14 +62,5 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
-
-    @GetMapping("/{id}/feed")
-    public List<Object> getFeed(@PathVariable Long id) {
-        return userService.getFeed(id);
-    }
-
-    @GetMapping("/{id}/recommendations")
-    public List<Object> getRecommendations(@PathVariable Long id) {
-        return userService.getRecommendations(id);
-    }
+    
 }
