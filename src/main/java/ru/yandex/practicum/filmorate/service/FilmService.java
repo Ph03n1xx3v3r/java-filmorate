@@ -1,0 +1,60 @@
+package ru.yandex.practicum.filmorate.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+
+import java.util.List;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class FilmService {
+    private final InMemoryFilmStorage filmStorage;
+
+    public List<Film> getAllFilms() {
+        return filmStorage.getAllFilms();
+    }
+
+    public Film getFilm(Long id) {
+        return filmStorage.getFilm(id);
+    }
+
+    public Film addFilm(Film film) {
+        return filmStorage.addFilm(film);
+    }
+
+    public Film updateFilm(Film film) {
+        return filmStorage.updateFilm(film);
+    }
+
+    public void deleteFilm(Long id) {
+        filmStorage.deleteFilm(id);
+    }
+
+    public void addLike(Long filmId, Long userId) {
+        filmStorage.addLike(filmId, userId);
+    }
+
+    public void removeLike(Long filmId, Long userId) {
+        filmStorage.removeLike(filmId, userId);
+    }
+
+    public List<Film> getPopular(Integer count) {
+        return filmStorage.getPopular(count);
+    }
+
+    public List<Film> searchFilms(String query, String by) {
+        return filmStorage.searchFilms(query, by);
+    }
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+    public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
+        return filmStorage.getFilmsByDirector(directorId, sortBy);
+    }
+}
