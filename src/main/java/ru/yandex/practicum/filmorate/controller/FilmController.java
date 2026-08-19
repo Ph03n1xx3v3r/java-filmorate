@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
+
 import java.util.List;
 
 @RestController
@@ -51,10 +52,8 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopular(@RequestParam(required = false) Integer count,
-                                 @RequestParam(required = false) Long genreId,
-                                 @RequestParam(required = false) Integer year) {
-        return filmService.getPopular(count, genreId, year);
+    public List<Film> getPopular(@RequestParam(required = false) Integer count) {
+        return filmService.getPopular(count);
     }
 
     @GetMapping("/search")
