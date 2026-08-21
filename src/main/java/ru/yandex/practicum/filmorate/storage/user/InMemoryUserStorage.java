@@ -88,12 +88,14 @@ public class InMemoryUserStorage implements UserStorage {
             throw new NotFoundException("Пользователь не найден");
         }
         Set<Long> userFriends = friends.get(userId);
-        if (userFriends == null || !userFriends.contains(friendId)) {
-            throw new NotFoundException("Друг не найден");
+        if (userFriends != null) {
+            userFriends.remove(friendId);
         }
-        userFriends.remove(friendId);
-        friends.get(friendId).remove(userId);
-        log.info("Пользователи {} и {} перестали быть друзьями", userId, friendId);
+        Set<Long> friendFriends = friends.get(friendId);
+        if (friendFriends != null) {
+            friendFriends.remove(userId);
+        }
+        log.info("Пользователи {} и {} перестали быть друзьями (или не были)", userId, friendId);
     }
 
     public List<User> getFriends(Long userId) {
