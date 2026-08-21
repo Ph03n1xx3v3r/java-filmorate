@@ -1,1 +1,2 @@
-# Filmorate - Друзья и лайки
+# java-filmorate
+Template repository for Filmorate project.
