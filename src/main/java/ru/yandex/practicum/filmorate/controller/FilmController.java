@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
 
@@ -16,7 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
-    private final UserService userService;
 
     @GetMapping
     public List<Film> getAllFilms() {
@@ -45,36 +43,16 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        userService.getUser(userId); // проверка существования пользователя
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        userService.getUser(userId); // проверка существования пользователя
         filmService.removeLike(id, userId);
     }
 
     @GetMapping("/popular")
     public List<Film> getPopular(@RequestParam(required = false) Integer count) {
         return filmService.getPopular(count);
-    }
-
-    @GetMapping("/search")
-    public List<Film> searchFilms(@RequestParam String query,
-                                  @RequestParam String by) {
-        return filmService.searchFilms(query, by);
-    }
-
-    @GetMapping("/common")
-    public List<Film> getCommonFilms(@RequestParam Long userId,
-                                     @RequestParam Long friendId) {
-        return filmService.getCommonFilms(userId, friendId);
-    }
-
-    @GetMapping("/director/{directorId}")
-    public List<Film> getFilmsByDirector(@PathVariable Long directorId,
-                                         @RequestParam String sortBy) {
-        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }
