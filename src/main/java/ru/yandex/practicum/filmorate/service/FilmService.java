@@ -43,7 +43,6 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-        // Проверяем существование
         userStorage.getUser(userId);
         filmStorage.getFilm(filmId);
         likes.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
