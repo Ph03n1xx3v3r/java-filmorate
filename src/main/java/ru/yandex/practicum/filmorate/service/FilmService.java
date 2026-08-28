@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
@@ -12,13 +14,10 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class FilmService {
-<<<<<<< Updated upstream
-    private final InMemoryFilmStorage filmStorage;
-=======
     private static final int DEFAULT_POPULAR_COUNT = 10;
+
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
->>>>>>> Stashed changes
 
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
@@ -42,41 +41,19 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
-<<<<<<< Updated upstream
-=======
         userStorage.getUser(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
->>>>>>> Stashed changes
         filmStorage.addLike(filmId, userId);
     }
 
     public void removeLike(Long filmId, Long userId) {
-<<<<<<< Updated upstream
-=======
         userStorage.getUser(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
->>>>>>> Stashed changes
         filmStorage.removeLike(filmId, userId);
     }
 
     public List<Film> getPopular(Integer count) {
-<<<<<<< Updated upstream
-        return filmStorage.getPopular(count);
-    }
-
-    public List<Film> searchFilms(String query, String by) {
-        return filmStorage.searchFilms(query, by);
-    }
-
-    public List<Film> getCommonFilms(Long userId, Long friendId) {
-        return filmStorage.getCommonFilms(userId, friendId);
-    }
-
-    public List<Film> getFilmsByDirector(Long directorId, String sortBy) {
-        return filmStorage.getFilmsByDirector(directorId, sortBy);
-=======
         int limit = (count == null || count <= 0) ? DEFAULT_POPULAR_COUNT : count;
         return filmStorage.getPopular(limit);
->>>>>>> Stashed changes
     }
 }
