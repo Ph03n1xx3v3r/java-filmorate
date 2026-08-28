@@ -15,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmService {
     private static final int DEFAULT_POPULAR_COUNT = 10;
+
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 

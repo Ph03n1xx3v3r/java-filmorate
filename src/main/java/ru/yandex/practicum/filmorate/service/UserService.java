@@ -3,13 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-<<<<<<< Updated upstream
-=======
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
->>>>>>> Stashed changes
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
 
@@ -17,11 +14,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-<<<<<<< Updated upstream
-    private final InMemoryUserStorage userStorage;
-=======
     private final UserStorage userStorage;
->>>>>>> Stashed changes
 
     public List<User> getAllUsers() {
         return userStorage.getAllUsers();
@@ -33,12 +26,9 @@ public class UserService {
     }
 
     public User addUser(User user) {
-<<<<<<< Updated upstream
-=======
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
->>>>>>> Stashed changes
         return userStorage.addUser(user);
     }
 
@@ -51,8 +41,6 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-<<<<<<< Updated upstream
-=======
         if (userId.equals(friendId)) {
             throw new ValidationException("Нельзя добавить самого себя в друзья");
         }
@@ -60,7 +48,6 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         userStorage.getUser(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + friendId + " не найден"));
->>>>>>> Stashed changes
         userStorage.addFriend(userId, friendId);
     }
 
@@ -69,22 +56,16 @@ public class UserService {
     }
 
     public List<User> getFriends(Long userId) {
-<<<<<<< Updated upstream
-=======
         userStorage.getUser(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
->>>>>>> Stashed changes
         return userStorage.getFriends(userId);
     }
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
-<<<<<<< Updated upstream
-=======
         userStorage.getUser(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         userStorage.getUser(otherId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + otherId + " не найден"));
->>>>>>> Stashed changes
         return userStorage.getCommonFriends(userId, otherId);
     }
 }
