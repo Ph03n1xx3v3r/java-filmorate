@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Data
 public class Film {
@@ -20,7 +19,6 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Продолжительность должна быть положительным числом")
     private int duration;
-    private Map<String, Object> mpa;
-    private List<Map<String, Object>> genres;
-    private List<Map<String, Object>> directors;
+    private Mpa mpa;
+    private List<Genre> genres;
 }
