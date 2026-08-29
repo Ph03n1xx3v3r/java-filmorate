@@ -73,7 +73,7 @@ public class FilmDbStorageTest {
         assertThat(found.get().getGenres()).hasSize(2);
         assertThat(found.get().getGenres().get(0).getId()).isEqualTo(1);
     }
-    
+
     @Test
     @Disabled("Тест противоречит testGetPopularFilms, ожидается уточнение логики")
     void testAddAndRemoveLike() {
