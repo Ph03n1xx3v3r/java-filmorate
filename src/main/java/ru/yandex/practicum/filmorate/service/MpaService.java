@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,10 @@ public class MpaService {
 
     public Mpa getMpa(int id) {
         String sql = "SELECT * FROM mpa WHERE id = ?";
-        List<Mpa> mpaList = jdbcTemplate.query(sql, mpaRowMapper, id);
-        if (mpaList.isEmpty()) {
+        try {
+            return jdbcTemplate.queryForObject(sql, mpaRowMapper, id);
+        } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("MPA с id " + id + " не найден");
         }
-        return mpaList.get(0);
     }
 }
