@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -26,10 +25,10 @@ public class GenreService {
 
     public Genre getGenre(int id) {
         String sql = "SELECT * FROM genres WHERE id = ?";
-        try {
-            return jdbcTemplate.queryForObject(sql, genreRowMapper, id);
-        } catch (EmptyResultDataAccessException e) {
+        List<Genre> result = jdbcTemplate.query(sql, genreRowMapper, id);
+        if (result.isEmpty()) {
             throw new NotFoundException("Жанр с id " + id + " не найден");
         }
+        return result.get(0);
     }
 }

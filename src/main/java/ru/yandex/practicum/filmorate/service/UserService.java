@@ -56,11 +56,11 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
         userStorage.getUser(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id " + friendId + " не найден"));
-        // Проверяем, есть ли такая связь, если нет — просто выходим (идемпотентность)
+        // Идемпотентное удаление: если друзей нет, просто возвращаем 200
         List<User> friends = userStorage.getFriends(userId);
         boolean isFriend = friends.stream().anyMatch(u -> u.getId().equals(friendId));
         if (!isFriend) {
-            return; // ничего не делаем, возвращаем 200
+            return;
         }
         userStorage.removeFriend(userId, friendId);
     }
