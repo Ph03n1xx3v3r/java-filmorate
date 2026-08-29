@@ -56,8 +56,4 @@ public class FilmService {
         int limit = (count == null || count <= 0) ? DEFAULT_POPULAR_COUNT : count;
         return filmStorage.getPopular(limit);
     }
-
-    public List<Film> searchFilms(String query, String by) {
-        return filmStorage.getAllFilms();
-    }
 }
