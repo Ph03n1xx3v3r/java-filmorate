@@ -27,7 +27,7 @@ public class MpaService {
         String sql = "SELECT * FROM mpa WHERE id = ?";
         List<Mpa> mpaList = jdbcTemplate.query(sql, mpaRowMapper, id);
         if (mpaList.isEmpty()) {
-            throw new NotFoundException("Рейтинг с id " + id + " не найден");
+            throw new NotFoundException("MPA с id " + id + " не найден");
         }
         return mpaList.get(0);
     }
