@@ -89,7 +89,6 @@ public class FilmDbStorage implements FilmStorage {
                     throw new NotFoundException("Жанр с id " + genre.getId() + " не найден");
                 }
             }
-            // Удаляем дубликаты жанров
             List<Genre> uniqueGenres = film.getGenres().stream()
                     .collect(Collectors.toMap(Genre::getId, Function.identity(), (existing, replacement) -> existing))
                     .values()
@@ -174,6 +173,7 @@ public class FilmDbStorage implements FilmStorage {
             LEFT JOIN mpa m ON f.mpa_id = m.id
             LEFT JOIN likes l ON f.id = l.film_id
             GROUP BY f.id, m.name
+            HAVING COUNT(l.user_id) > 0
             ORDER BY likes_count DESC
             LIMIT ?
             """;
