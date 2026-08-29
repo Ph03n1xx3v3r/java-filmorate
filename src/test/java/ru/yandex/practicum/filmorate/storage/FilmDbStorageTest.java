@@ -21,7 +21,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Sql(scripts = "/schema.sql")
+@Sql(scripts = {"/schema.sql", "/data.sql"})
 public class FilmDbStorageTest {
 
     @Autowired
