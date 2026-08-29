@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS mpa (
     name VARCHAR(10) NOT NULL
 );
 
-MERGE INTO mpa (id, name) KEY(id) VALUES
+INSERT IGNORE INTO mpa (id, name) VALUES
     (1, 'G'),
     (2, 'PG'),
     (3, 'PG-13'),
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS genres (
     name VARCHAR(50) NOT NULL
 );
 
-MERGE INTO genres (id, name) KEY(id) VALUES
+INSERT IGNORE INTO genres (id, name) VALUES
     (1, 'Комедия'),
     (2, 'Драма'),
     (3, 'Мультфильм'),
