@@ -52,6 +52,15 @@ public class UserService {
     }
 
     public void removeFriend(Long userId, Long friendId) {
+        userStorage.getUser(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден"));
+        userStorage.getUser(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + friendId + " не найден"));
+        List<User> friends = userStorage.getFriends(userId);
+        boolean isFriend = friends.stream().anyMatch(u -> u.getId().equals(friendId));
+        if (!isFriend) {
+            throw new NotFoundException("Друг не найден");
+        }
         userStorage.removeFriend(userId, friendId);
     }
 

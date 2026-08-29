@@ -14,6 +14,8 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -70,6 +72,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
+        if (film.getMpa() != null && film.getMpa().getId() != 0) {
+            String mpaCheck = "SELECT COUNT(*) FROM mpa WHERE id = ?";
+            Integer count = jdbcTemplate.queryForObject(mpaCheck, Integer.class, film.getMpa().getId());
+            if (count == 0) {
+                throw new NotFoundException("MPA с id " + film.getMpa().getId() + " не найден");
+            }
+        }
+        if (film.getGenres() != null) {
+            for (Genre genre : film.getGenres()) {
+                String genreCheck = "SELECT COUNT(*) FROM genres WHERE id = ?";
+                Integer count = jdbcTemplate.queryForObject(genreCheck, Integer.class, genre.getId());
+                if (count == 0) {
+                    throw new NotFoundException("Жанр с id " + genre.getId() + " не найден");
+                }
+            }
+            List<Genre> uniqueGenres = film.getGenres().stream()
+                    .collect(Collectors.toMap(Genre::getId, Function.identity(), (existing, replacement) -> existing))
+                    .values()
+                    .stream()
+                    .collect(Collectors.toList());
+            film.setGenres(uniqueGenres);
+        }
+
         String sql = """
             INSERT INTO films (name, description, release_date, duration, mpa_id)
             VALUES (?, ?, ?, ?, ?)
@@ -140,15 +165,15 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getPopular(int count) {
         String sql = """
-        SELECT f.*, m.name AS mpa_name,
-               COUNT(l.user_id) AS likes_count
-        FROM films f
-        LEFT JOIN mpa m ON f.mpa_id = m.id
-        LEFT JOIN likes l ON f.id = l.film_id
-        GROUP BY f.id, m.name
-        ORDER BY likes_count DESC
-        LIMIT ?
-        """;
+            SELECT f.*, m.name AS mpa_name,
+                   COUNT(l.user_id) AS likes_count
+            FROM films f
+            LEFT JOIN mpa m ON f.mpa_id = m.id
+            LEFT JOIN likes l ON f.id = l.film_id
+            GROUP BY f.id, m.name
+            ORDER BY likes_count DESC
+            LIMIT ?
+            """;
         List<Film> films = jdbcTemplate.query(sql, filmRowMapper, count);
         films.forEach(this::loadGenres);
         return films;
