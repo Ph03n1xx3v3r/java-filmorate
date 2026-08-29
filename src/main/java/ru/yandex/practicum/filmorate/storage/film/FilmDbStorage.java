@@ -12,8 +12,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -148,7 +146,6 @@ public class FilmDbStorage implements FilmStorage {
             LEFT JOIN mpa m ON f.mpa_id = m.id
             LEFT JOIN likes l ON f.id = l.film_id
             GROUP BY f.id, m.name
-            HAVING COUNT(l.user_id) > 0
             ORDER BY likes_count DESC
             LIMIT ?
             """;
