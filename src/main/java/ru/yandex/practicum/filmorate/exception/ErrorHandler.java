@@ -20,7 +20,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)   // <-- должно быть 404, а не 400
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(NotFoundException e) {
         return Map.of("error", e.getMessage());
     }

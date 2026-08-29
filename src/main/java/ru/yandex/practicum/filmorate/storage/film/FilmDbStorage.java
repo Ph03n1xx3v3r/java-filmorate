@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -87,6 +89,7 @@ public class FilmDbStorage implements FilmStorage {
                     throw new NotFoundException("Жанр с id " + genre.getId() + " не найден");
                 }
             }
+            // Удаляем дубликаты жанров
             List<Genre> uniqueGenres = film.getGenres().stream()
                     .collect(Collectors.toMap(Genre::getId, Function.identity(), (existing, replacement) -> existing))
                     .values()
