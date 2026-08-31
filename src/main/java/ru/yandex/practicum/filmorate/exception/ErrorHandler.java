@@ -16,14 +16,12 @@ public class ErrorHandler {
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidation(ValidationException e) {
-        log.warn("Ошибка валидации: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(NotFoundException e) {
-        log.warn("Ресурс не найден: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
@@ -33,7 +31,6 @@ public class ErrorHandler {
         String errors = e.getBindingResult().getFieldErrors().stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.joining("; "));
-        log.warn("Ошибка валидации аннотаций: {}", errors);
         return Map.of("error", errors);
     }
 
