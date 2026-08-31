@@ -89,11 +89,10 @@ public class FilmDbStorage implements FilmStorage {
                     throw new NotFoundException("Жанр с id " + genre.getId() + " не найден");
                 }
             }
-            List<Genre> uniqueGenres = film.getGenres().stream()
+
+            List<Genre> uniqueGenres = new ArrayList<>(film.getGenres().stream()
                     .collect(Collectors.toMap(Genre::getId, Function.identity(), (existing, replacement) -> existing))
-                    .values()
-                    .stream()
-                    .collect(Collectors.toList());
+                    .values());
             film.setGenres(uniqueGenres);
         }
 

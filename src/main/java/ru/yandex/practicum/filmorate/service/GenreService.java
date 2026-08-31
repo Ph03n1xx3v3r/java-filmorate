@@ -29,6 +29,6 @@ public class GenreService {
         if (result.isEmpty()) {
             throw new NotFoundException("Жанр с id " + id + " не найден");
         }
-        return result.get(0);
+        return result.getFirst();
     }
 }
